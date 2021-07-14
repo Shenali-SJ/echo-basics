@@ -10,7 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// custom context
+// -------------------------------custom context--------------------------
 type CustomContext struct {
 	echo.Context
 }
@@ -23,7 +23,7 @@ func (c *CustomContext) Bar() {
 	println("bar")
 }
 
-//cookie
+// ---------------------------------cookie-------------------------------
 func writeCookie(c echo.Context) error {
 	//creating a cookie
 	cookie := new(http.Cookie)
@@ -58,6 +58,21 @@ func readAllCookies(c echo.Context) error {
 	return c.String(http.StatusOK, "Read all the cookies")
 }
 
+// ---------------------------custome error handler----------------------
+func customErrorHandler(err error, c echo.Context) {
+	code := http.StatusInternalServerError
+
+	if he, ok := err.(*echo.HTTPError); ok {
+		code = he.Code
+	}
+
+	errorPage := fmt.Sprintf("%d.html", code)
+	if err := c.File(errorPage); err != nil {
+		c.Logger().Error(err)
+	}
+	c.Logger().Error(err)
+}
+
 func main() {
 	e := echo.New()
 
@@ -87,6 +102,26 @@ e.GET("/", func(c echo.Context) error {
 
 	return cc.String(200, "OK")
 })
+
+// for error handling
+// e.GET("/cats", func (c echo.Context) error {
+// 	type Cat struct {
+// 		Name string `json"name"`
+// 		Type string `json"type"`
+// 	}
+
+// 	cat := Cat{}
+// 	defer c.Request().Body.Close()
+
+// 	err := json.NewDecoder(c.Request().Body).Decode(&cat)
+// 	if err != nil {
+// 		e.HTTPErrorHandler = customErrorHandler
+// 		customErrorHandler(err, c)
+// 		log.Fatalf("Failed to read the request body %s", err)
+// 	}
+// 	log.Printf("Your cat %#v", cat)
+// 	return c.String(http.StatusOK, "We got your cat")
+// })
 
 	e.Logger.Fatal(e.Start(":8000"))
 }
