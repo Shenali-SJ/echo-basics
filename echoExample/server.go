@@ -42,8 +42,11 @@ func main() {
 	//create a new echo instance
 	e := echo.New()
 
-	e.GET("/", getHomePage)
-	e.GET("/users/:id", getUser)
+	route1 := e.GET("/", getHomePage)
+	route1.Name = "home-route"
+
+	e.GET("/users/:id", getUser).Name = "user-route"
+
 	e.GET("/show", show)
 	e.POST("/save", save)
 	e.POST("/users", getUsers)
@@ -141,6 +144,7 @@ func getUsers(c echo.Context) error {
 }
 
 func checkNull(c echo.Context) error {
+	//can have multiple before and after
 	c.Response().Before(func () {
 		fmt.Println("Before response")
 	})
