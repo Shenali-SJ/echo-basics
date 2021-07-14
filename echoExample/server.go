@@ -7,12 +7,34 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 )
 
 type User struct {
 	Name  string `json:"name" form:"name" query:"name"`
 	Email string `json:"email" form:"email" query:"email"`
+}
+
+// -----------------------------Data validation------------------------------
+//for validator
+type (
+	Person struct {
+		Name string `json:"name" validate:"required"`
+		Email string `json:"email" validate:"required,email"`
+	}
+
+	CustomValidator struct {
+		validator *validator.Validate
+	}
+)
+
+func (cv *CustomValidator) Validate(i interface{}) error {
+	// validates a structs exposed fields
+	if err := cv.validator.Struct(i); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+	return nil
 }
 
 func main() {
@@ -24,6 +46,19 @@ func main() {
 	e.GET("/show", show)
 	e.POST("/save", save)
 	e.POST("/users", getUsers)
+
+	// validator
+	e.Validator = &CustomValidator{validator: validator.New()}
+	e.POST("/people", func(c echo.Context) (err error) {
+		p := new(Person)
+		if err = c.Bind(p); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		if err = c.Validate(p); err != nil {
+			return err
+		}
+		return c.JSON(http.StatusOK, p)
+	})
 
 	//start the echo server
 	e.Logger.Fatal(e.Start(":1323"))
