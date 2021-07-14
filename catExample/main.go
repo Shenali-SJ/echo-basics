@@ -2,12 +2,15 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
 
+// custom context
 type CustomContext struct {
 	echo.Context
 }
@@ -20,6 +23,40 @@ func (c *CustomContext) Bar() {
 	println("bar")
 }
 
+//cookie
+func writeCookie(c echo.Context) error {
+	//creating a cookie
+	cookie := new(http.Cookie)
+	cookie.Name = "username"
+	cookie.Value = "jon"
+	cookie.Expires = time.Now().Add(24 * time.Hour)
+
+	//adds a Set-Cookie header in HTTP response
+	c.SetCookie(cookie)
+
+	return c.String(http.StatusOK, "Write a cookie")
+}
+
+func readCookie(c echo.Context) error {
+	//cookie is read by name
+	cookie, err := c.Cookie("username")
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(cookie.Name)
+	fmt.Println(cookie.Value)
+
+	return c.String(http.StatusOK, "Read a cookie")
+}
+
+func readAllCookies(c echo.Context) error {
+	for _, cookie := range c.Cookies() {
+		fmt.Println(cookie.Name)
+		fmt.Println(cookie.Value)
+	}
+	return c.String(http.StatusOK, "Read all the cookies")
+}
 
 func main() {
 	e := echo.New()
@@ -42,6 +79,12 @@ e.GET("/", func(c echo.Context) error {
 	cc := c.(*CustomContext)
 	cc.Foo()
 	cc.Bar()
+
+	//cookies
+	writeCookie(cc)
+	readCookie(cc)
+	readAllCookies(cc)
+
 	return cc.String(200, "OK")
 })
 
@@ -60,12 +103,16 @@ func GetCats(c echo.Context) error {
 // path variables and query param
 // http://localhost:8000/cats2/json?name=mickyBoo&type=spinx
 func GetCats2(c echo.Context) error {
+	writeCookie(c)  //cookie
+
 	// queryparams
 	catName := c.QueryParam("name")
 	catType := c.QueryParam("type")
 	
 	//path param
 	dataType := c.Param("data")
+
+	readAllCookies(c)
 
 	if dataType == "string" {
 		return c.String(http.StatusOK, "Cat Name : "+ catName + " type : " + catType)
@@ -79,6 +126,7 @@ func GetCats2(c echo.Context) error {
 			"error": "Specify data type as string or JSON",
 		})
 	}
+	
 }
 
 func AddCat(c echo.Context) error {
