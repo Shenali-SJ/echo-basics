@@ -8,6 +8,18 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+type CustomContext struct {
+	echo.Context
+}
+
+func (c *CustomContext) Foo() {
+	println("foo")
+}
+
+func (c *CustomContext) Bar() {
+	println("bar")
+}
+
 
 func main() {
 	e := echo.New()
@@ -15,6 +27,23 @@ func main() {
 	e.GET("/cats", GetCats)
 	e.GET("/cats2/:data", GetCats2)
 	e.POST("/cats", AddCat)
+
+	//custom context
+	//create a middleware to extend default context
+	//this middleware should be registered before any other middleware
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			cc := &CustomContext{c}
+			return next(cc)
+		}
+	})
+
+e.GET("/", func(c echo.Context) error {
+	cc := c.(*CustomContext)
+	cc.Foo()
+	cc.Bar()
+	return cc.String(200, "OK")
+})
 
 	e.Logger.Fatal(e.Start(":8000"))
 }

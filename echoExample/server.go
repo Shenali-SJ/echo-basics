@@ -11,8 +11,8 @@ import (
 )
 
 type User struct {
-	Name string `json:"name"`
-	Email string `json:"email"`
+	Name  string `json:"name" form:"name" query:"name"`
+	Email string `json:"email" form:"email" query:"email"`
 }
 
 func main() {
@@ -99,7 +99,7 @@ func getUsers(c echo.Context) error {
 	if err := c.Bind(u); err != nil {
 		return err
 	}
-	return c.JSON(http.StatusCreated, "User received")
+	return c.JSON(http.StatusOK, u)
 	// return c.XML(http.StatusCreated, u)
 }
 
