@@ -1,0 +1,32 @@
+[
+ {
+  "method": "GET",
+  "path": "/null",
+  "name": "main.checkNull"
+ },
+ {
+  "method": "GET",
+  "path": "/",
+  "name": "home-route"
+ },
+ {
+  "method": "GET",
+  "path": "/users/:id",
+  "name": "user-route"
+ },
+ {
+  "method": "GET",
+  "path": "/show",
+  "name": "main.show"
+ },
+ {
+  "method": "POST",
+  "path": "/save",
+  "name": "main.save"
+ },
+ {
+  "method": "POST",
+  "path": "/users",
+  "name": "main.getUsers"
+ }
+]

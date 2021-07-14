@@ -3,8 +3,10 @@ package main
 //Remove-item alias:curl
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 
@@ -53,17 +55,24 @@ func main() {
 	e.GET("/null", checkNull)
 
 	// validator
-	e.Validator = &CustomValidator{validator: validator.New()}
-	e.POST("/people", func(c echo.Context) (err error) {
-		p := new(Person)
-		if err = c.Bind(p); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-		}
-		if err = c.Validate(p); err != nil {
-			return err
-		}
-		return c.JSON(http.StatusOK, p)
-	})
+	// e.Validator = &CustomValidator{validator: validator.New()}
+	// e.POST("/people", func(c echo.Context) (err error) {
+	// 	p := new(Person)
+	// 	if err = c.Bind(p); err != nil {
+	// 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	// 	}
+	// 	if err = c.Validate(p); err != nil {
+	// 		return err
+	// 	}
+	// 	return c.JSON(http.StatusOK, p)
+	// })
+
+	// output all the route to a JSON file
+	data, err := json.MarshalIndent(e.Routes(), "", " ")
+	if err != nil {
+		return 
+	}
+	ioutil.WriteFile("routes.json", data, 0644)
 
 	//start the echo server
 	e.Logger.Fatal(e.Start(":1323"))
