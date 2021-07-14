@@ -3,6 +3,7 @@ package main
 //Remove-item alias:curl
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -46,6 +47,7 @@ func main() {
 	e.GET("/show", show)
 	e.POST("/save", save)
 	e.POST("/users", getUsers)
+	e.GET("/null", checkNull)
 
 	// validator
 	e.Validator = &CustomValidator{validator: validator.New()}
@@ -138,4 +140,15 @@ func getUsers(c echo.Context) error {
 	// return c.XML(http.StatusCreated, u)
 }
 
+func checkNull(c echo.Context) error {
+	c.Response().Before(func () {
+		fmt.Println("Before response")
+	})
+	c.Response().After(func() {
+		fmt.Println("After response")
+	})
+
+	// return c.NoContent(http.StatusNoContent)
+	return c.String(http.StatusOK, "Hooks succeded")
+}
 
